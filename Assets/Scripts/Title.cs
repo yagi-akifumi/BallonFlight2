@@ -25,7 +25,7 @@ public class Title : MonoBehaviour
     {
         if (!goNextScene && fade.IsFadeOutComplete())
         {
-            SceneManager.LoadScene("stage1");
+            SceneManager.LoadScene("Stage1");
             goNextScene = true;
         }
     }
