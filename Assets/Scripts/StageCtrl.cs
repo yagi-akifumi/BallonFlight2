@@ -7,15 +7,17 @@ public class StageCtrl : MonoBehaviour
 {
     [Header("プレイヤーゲームオブジェクト")] public GameObject playerObj;
     [Header("コンティニュー位置")] public GameObject[] continuePoint;
-    [Header("ゲームオーバー")] public GameObject gameOverObj;//New!
-    [Header("フェード")] public FadeImage fade;//New!
+    [Header("ゲームオーバー")] public GameObject gameOverObj;
+    [Header("フェード")] public FadeImage fade;
+    [Header("ゲームオーバー時に鳴らすSE")] public AudioClip gameOverSE;
+    [Header("リトライ時に鳴らすSE")] public AudioClip retrySE;
 
     private Player p;
-    private int nextStageNum; //New!
-    private bool startFade = false; //New!
-    private bool doGameOver = false; //New!
-    private bool retryGame = false; //New!
-    private bool doSceneChange = false; //New!
+    private int nextStageNum;
+    private bool startFade = false;
+    private bool doGameOver = false;
+    private bool retryGame = false;
+    private bool doSceneChange = false;
 
     // Start is called before the first frame update
     void Start()
@@ -43,6 +45,7 @@ public class StageCtrl : MonoBehaviour
         if (GManager.instance.isGameOver && !doGameOver) //New!
         {
             gameOverObj.SetActive(true);
+            GManager.instance.PlaySE(gameOverSE);
             doGameOver = true;
         }
         //プレイヤーがやられた時の処理
@@ -85,6 +88,7 @@ public class StageCtrl : MonoBehaviour
     /// </summary>
     public void Retry()
     {
+        GManager.instance.PlaySE(retrySE); //New!
         ChangeScene(1); //最初のステージに戻るので１
         retryGame = true;
     }

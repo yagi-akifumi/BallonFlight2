@@ -10,6 +10,7 @@ public class EnemyHP : MonoBehaviour
     [Header("重力")] public float gravity;
     [Header("画面外でも行動するか")] public bool nonVisible;
     [Header("接触判定")] public EnemyCollisionCheck checkCollision;
+    [Header("敵を踏んだ時に鳴らすSE")] public AudioClip enemySE;
 
     #endregion
 
@@ -66,6 +67,7 @@ public class EnemyHP : MonoBehaviour
         {
             if(!isDead)
             {
+                GManager.instance.PlaySE(enemySE);
                 anim.Play("Death");
                 rb.velocity = new Vector2(0, -gravity);
                 isDead = true;

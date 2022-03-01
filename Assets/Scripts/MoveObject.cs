@@ -4,20 +4,90 @@ using UnityEngine;
 
 public class MoveObject : MonoBehaviour
 {
-    [Header("移動速度")]
-    public float moveSpeed;
+    [Header("移動経路")]public GameObject[] movePoint;
+    [Header("速さ")] public float speed=1.0f;
 
-    void Update()
+    private Rigidbody2D rb = null;
+    private int nowPoint = 0;
+    private bool returnPoint = false;
+    private Vector2 oldPos = Vector2.zero;
+    private Vector2 myVelocity = Vector2.zero;
+
+    void Start()
     {
-
-        // スクリプトがアタッチされているゲームオブジェクトの位置情報を更新して移動させる
-        transform.position += new Vector3(-moveSpeed, 0, 0);
-
-        // スクリプトがアタッチされているゲームオブジェクトがゲーム画面に移らない位置まで移動したら
-        if (transform.position.x <= -14.0f)
+        rb = GetComponent<Rigidbody2D>();
+        if (movePoint != null && movePoint.Length > 0 && rb != null)
         {
-            // スクリプトがアタッチされているゲームオブジェクトを破壊
-            Destroy(gameObject);
+            rb.position = movePoint[0].transform.position;
+            oldPos = rb.position;
         }
+    }
+
+    public Vector2 GetVelocity()
+    {
+        return myVelocity;
+    }
+
+    private void FixedUpdate()
+    {
+        if (movePoint != null && movePoint.Length > 1 && rb != null)
+        {
+            //通常進行
+            if (!returnPoint)
+            {
+                int nextPoint = nowPoint + 1;
+
+                //目標ポイントとの誤差がわずかになるまで移動
+                if (Vector2.Distance(transform.position, movePoint[nextPoint].transform.position) > 0.1f)
+                {
+                    //Vector2.MoveTowards(A地点,B地点,最大距離):A地点からB地点へのベクトル上を返すメソッド
+                    Vector2 toVector = Vector2.MoveTowards(transform.position, movePoint[nextPoint].transform.position, speed * Time.deltaTime);
+
+                    //次のポイントへ移動
+                    rb.MovePosition(toVector);
+                }
+                //次のポイントを１つ進める
+                else
+                {
+                    rb.MovePosition(movePoint[nextPoint].transform.position);
+                    ++nowPoint;
+
+                    //現在地が配列の最後だった場合
+                    if (nowPoint + 1 >= movePoint.Length)
+                    {
+                        returnPoint = true;
+                    }
+                }
+            }
+            //折返し進行
+            else
+            {
+                int nextPoint = nowPoint - 1;
+
+                //目標ポイントとの誤差がわずかになるまで移動
+                if (Vector2.Distance(transform.position, movePoint[nextPoint].transform.position) > 0.1f)
+                {
+                    //現在地から次のポイントへのベクトルを作成
+                    Vector2 toVector = Vector2.MoveTowards(transform.position, movePoint[nextPoint].transform.position, speed * Time.deltaTime);
+
+                    //次のポイントへ移動
+                    rb.MovePosition(toVector);
+                }
+                //次のポイントを１つ戻す
+                else
+                {
+                    rb.MovePosition(movePoint[nextPoint].transform.position);
+                    --nowPoint;
+
+                    //現在地が配列の最初だった場合
+                    if (nowPoint <= 0)
+                    {
+                        returnPoint = false;
+                    }
+                }
+            }
+        }
+        myVelocity = (rb.position - oldPos) / Time.deltaTime;
+        oldPos = rb.position;
     }
 }

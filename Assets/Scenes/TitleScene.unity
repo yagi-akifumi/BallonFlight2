@@ -234,10 +234,10 @@ RectTransform:
   m_Father: {fileID: 1141538532}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -0.00024414062, y: 0.00024414062}
-  m_SizeDelta: {x: 0.00048828, y: 0.00061035}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 2828, y: 1242}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &346887675
 MonoBehaviour:
@@ -480,7 +480,7 @@ MonoBehaviour:
   m_ScaleFactor: 1
   m_ReferenceResolution: {x: 2868, y: 1242}
   m_ScreenMatchMode: 0
-  m_MatchWidthOrHeight: 0
+  m_MatchWidthOrHeight: 1
   m_PhysicalUnit: 3
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
@@ -793,7 +793,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5198046086778261165, guid: 7b93969ee1d684c43af6c2ea2a13b44b, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 1829.4
+      value: 1242
       objectReference: {fileID: 0}
     - target: {fileID: 5198046086778261165, guid: 7b93969ee1d684c43af6c2ea2a13b44b, type: 3}
       propertyPath: m_LocalPosition.x

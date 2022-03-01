@@ -15,6 +15,9 @@ public class Player : MonoBehaviour
     [Header("ダッシュの速さ表現")] public AnimationCurve dashCurve;
     [Header("ジャンプの速さ表現")] public AnimationCurve jumpCurve;
     [Header("踏みつけ判定の高さの割合(%)")] public float stepOnRate;
+    [Header("ジャンプする時に鳴らす音踏みつけ判定の高さの割合(%)")] public AudioClip jumpSE;
+    [Header("やられた鳴らすSE")] public AudioClip downSE;
+    [Header("コンティニュー時に鳴らすSE")] public AudioClip continueSE;
     #endregion
 
     #region//プライベート変数 
@@ -22,6 +25,7 @@ public class Player : MonoBehaviour
     private Rigidbody2D rb = null;
     private CapsuleCollider2D capcol = null;
     private SpriteRenderer sr = null;
+    private MoveObject moveObj = null;
     private bool isGround = false;
     private bool isJump = false;
     private bool isHead = false;
@@ -40,6 +44,8 @@ public class Player : MonoBehaviour
     private string enemyTag = "Enemy";
     private string deadAreaTag = "DeadArea";
     private string hitAreaTag = "HitArea";
+    private string moveFloorTag = "MoveFloor";
+    private string fallFloorTag = "FallFloor";
     #endregion
 
     void Start()
@@ -103,7 +109,12 @@ public class Player : MonoBehaviour
             SetAnimation();
 
             //移動速度を設定
-            rb.velocity = new Vector2(xSpeed, ySpeed);
+            Vector2 addVelocity = Vector2.zero;
+            if (moveObj != null)//動く床のスクリプトを取得している時
+            {
+                addVelocity = moveObj.GetVelocity();//動く床の速度を取得
+            }
+            rb.velocity = new Vector2(xSpeed, ySpeed) + addVelocity;//プレイヤーに動く床の速度を足す;
         }
         else
         {
@@ -144,6 +155,10 @@ public class Player : MonoBehaviour
         {
             if (verticalKey > 0)
             {
+                if(!isJump)
+                {
+                    GManager.instance.PlaySE(jumpSE);
+                }
                 ySpeed = jumpSpeed;
                 jumpPos = transform.position.y; //ジャンプした位置を記録する
                 isJump = true;
@@ -276,6 +291,7 @@ public class Player : MonoBehaviour
     /// </summary> 
     public void ContinuePlayer()
     {
+        GManager.instance.PlaySE(continueSE);
         isDown = false;
         anim.Play("Cindy_Idle");
         isJump = false;
@@ -302,6 +318,7 @@ public class Player : MonoBehaviour
                 nonDownAnim = true;
             }
             isDown = true;
+            GManager.instance.PlaySE(downSE);
             GManager.instance.SubHeartNum();
         }
     }
@@ -309,7 +326,11 @@ public class Player : MonoBehaviour
     #region//接触判定 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.collider.tag == enemyTag)
+        bool enemy = (collision.collider.tag == enemyTag);
+        bool moveFloor = (collision.collider.tag == moveFloorTag);
+        bool fallFloor = (collision.collider.tag == fallFloorTag);
+
+        if (enemy || moveFloor || fallFloor)
         {
             //踏みつけ判定になる高さ
             float stepOnHeight = (capcol.size.y * (stepOnRate / 100f));
@@ -321,36 +342,64 @@ public class Player : MonoBehaviour
             {
                 if (p.point.y < judgePos)
                 {
-                    ObjectCollision o = collision.gameObject.GetComponent<ObjectCollision>();
-
-                    if (o != null)
+                    if (enemy || fallFloor)
                     {
-                        otherJumpHeight = o.boundHeight;    //踏んづけたものから跳ねる高さを取得する
-                        o.playerStepOn = true;        //踏んづけたものに対して踏んづけた事を通知する
-                        jumpPos = transform.position.y; //ジャンプした位置を記録する 
-                        isOtherJump = true;
-                        isJump = false;
-                        jumpTime = 0.0f;
-                    }
-                    else
-                    {
+                        ObjectCollision o = collision.gameObject.GetComponent<ObjectCollision>();
+                        if (o != null)
+                        {
+                            if (enemy)
+                            {
+                                otherJumpHeight = o.boundHeight;    //踏んづけたものから跳ねる高さを取得する
+                                o.playerStepOn = true;        //踏んづけたものに対して踏んづけた事を通知する
+                                jumpPos = transform.position.y; //ジャンプした位置を記録する
+                                isOtherJump = true;
+                                isJump = false;
+                                jumpTime = 0.0f;
+                            }
+                            else if(fallFloor)
+                            {
+                                o.playerStepOn = true;
+                            }
+                        }
+                        else
+                        {
                         Debug.Log("ObjectCollisionが付いてないよ!");
+                        }
+                    }
+                    else if(moveFloor)
+                    {
+                        Debug.Log("nazekadamage");
+                        moveObj = collision.gameObject.GetComponent<MoveObject>();
                     }
                 }
                 else
                 {
-                    ReceiveDamage(true);
-                    break;
+                    if (enemy)
+                    {
+                        ReceiveDamage(true);
+                        break;
+                    }
                 }
             }
         }
+
     }
-    #endregion
+
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        if(collision.collider.tag==moveFloorTag)
+        {
+            //動く床から離れた
+            moveObj = null;
+        }
+    }
+
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.tag == deadAreaTag)
         {
+
             ReceiveDamage(false);   //落下判定　ダウンアニメしない
         }
         else if (collision.tag == hitAreaTag)
@@ -358,4 +407,5 @@ public class Player : MonoBehaviour
             ReceiveDamage(true);    //落下判定　ダウンアニメする
         }
     }
+    #endregion
 }
