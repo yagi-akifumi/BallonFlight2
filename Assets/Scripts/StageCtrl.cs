@@ -11,6 +11,10 @@ public class StageCtrl : MonoBehaviour
     [Header("フェード")] public FadeImage fade;
     [Header("ゲームオーバー時に鳴らすSE")] public AudioClip gameOverSE;
     [Header("リトライ時に鳴らすSE")] public AudioClip retrySE;
+    [Header("ステージクリアSE")] public AudioClip StageClearSE;
+    [Header("ステージクリア")] public GameObject StageClearObj;
+    [Header("ステージクリア判定")] public PlayerTriggerCheck StageClearTrigger;
+
 
     private Player p;
     private int nextStageNum;
@@ -18,13 +22,15 @@ public class StageCtrl : MonoBehaviour
     private bool doGameOver = false;
     private bool retryGame = false;
     private bool doSceneChange = false;
+    private bool doClear = false;
 
     // Start is called before the first frame update
     void Start()
     {
         if (playerObj != null && continuePoint != null && continuePoint.Length > 0 && gameOverObj != null && fade != null)
         {
-            gameOverObj.SetActive(false); // New!
+            gameOverObj.SetActive(false);
+            StageClearObj.SetActive(false);
             playerObj.transform.position = continuePoint[0].transform.position;
             p = playerObj.GetComponent<Player>();
             if (p == null)
@@ -42,14 +48,14 @@ public class StageCtrl : MonoBehaviour
     void Update()
     {
         //ゲームオーバー時の処理
-        if (GManager.instance.isGameOver && !doGameOver) //New!
+        if (GManager.instance.isGameOver && !doGameOver)
         {
             gameOverObj.SetActive(true);
             GManager.instance.PlaySE(gameOverSE);
             doGameOver = true;
         }
         //プレイヤーがやられた時の処理
-        else if (p != null && p.IsContinueWaiting() && !doGameOver)  //New!
+        else if (p != null && p.IsContinueWaiting() && !doGameOver)
         {
             if (continuePoint.Length > GManager.instance.continueNum)
             {
@@ -61,6 +67,12 @@ public class StageCtrl : MonoBehaviour
                 Debug.Log("コンティニューポイントの設定が足りてないよ！");
             }
         }
+        else if (StageClearTrigger != null && StageClearTrigger.isOn && !doGameOver && !doClear)
+        {
+            StageClear();
+            doClear = true;
+        }
+
 
         //ステージを切り替える
         if (fade != null && startFade && !doSceneChange)
@@ -77,6 +89,7 @@ public class StageCtrl : MonoBehaviour
                 {
                     GManager.instance.stageNum = nextStageNum;
                 }
+                GManager.instance.isStageClear = false;//移動する前にステージクリアのフラグを降ろす
                 SceneManager.LoadScene("stage" + nextStageNum);
                 doSceneChange = true;
             }
@@ -105,5 +118,14 @@ public class StageCtrl : MonoBehaviour
             fade.StartFadeOut();
             startFade = true;
         }
+    }
+    /// <summary>
+    /// ステージをクリアした
+    /// </summary>
+    public void StageClear()
+    {
+        GManager.instance.isStageClear = true;//演出用のオブジェクトをアクティブにしている
+        StageClearObj.SetActive(true);
+        GManager.instance.PlaySE(StageClearSE);
     }
 }

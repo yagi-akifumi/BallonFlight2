@@ -16,7 +16,7 @@ public class PlayerTriggerCheck : MonoBehaviour
     {
         if (collision.tag == playerTag)
         {
-
+            Debug.Log("PlayerTriggerCheckきどう");
             isOn = true;
         }
     }

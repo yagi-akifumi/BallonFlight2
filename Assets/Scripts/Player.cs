@@ -34,6 +34,7 @@ public class Player : MonoBehaviour
     private bool isOtherJump = false;
     private bool isContinue = false;
     private bool nonDownAnim = false;
+    private bool isClearMotion = false;
     private float jumpPos = 0.0f;
     private float otherJumpHeight = 0.0f;
     private float dashTime = 0.0f;
@@ -95,7 +96,7 @@ public class Player : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (!isDown && !GManager.instance.isGameOver)
+        if (!isDown && !GManager.instance.isGameOver && !GManager.instance.isStageClear)
         {
             //接地判定を得る
             isGround = ground.IsGround();
@@ -118,6 +119,11 @@ public class Player : MonoBehaviour
         }
         else
         {
+            if(isClearMotion&&GManager.instance.isStageClear)
+            {
+                anim.Play("player_clear");
+                isClearMotion = true;
+            }
             rb.velocity = new Vector2(0, -gravity);
         }
     }
@@ -155,7 +161,7 @@ public class Player : MonoBehaviour
         {
             if (verticalKey > 0)
             {
-                if(!isJump)
+                if (!isJump)
                 {
                     GManager.instance.PlaySE(jumpSE);
                 }
@@ -265,7 +271,7 @@ public class Player : MonoBehaviour
         }
         else
         {
-            return IsDownAnimEnd()||nonDownAnim;//コンテニューする
+            return IsDownAnimEnd() || nonDownAnim;//コンテニューする
         }
     }
 
@@ -301,9 +307,10 @@ public class Player : MonoBehaviour
         nonDownAnim = false;
     }
 
+    //やられた時の演出
     private void ReceiveDamage(bool downAnim)
     {
-        if (isDown)
+        if (isDown||GManager.instance.isStageClear)
         {
             return;
         }
@@ -356,19 +363,18 @@ public class Player : MonoBehaviour
                                 isJump = false;
                                 jumpTime = 0.0f;
                             }
-                            else if(fallFloor)
+                            else if (fallFloor)
                             {
                                 o.playerStepOn = true;
                             }
                         }
                         else
                         {
-                        Debug.Log("ObjectCollisionが付いてないよ!");
+                            Debug.Log("ObjectCollisionが付いてないよ!");
                         }
                     }
-                    else if(moveFloor)
+                    else if (moveFloor)
                     {
-                        Debug.Log("nazekadamage");
                         moveObj = collision.gameObject.GetComponent<MoveObject>();
                     }
                 }
@@ -387,7 +393,7 @@ public class Player : MonoBehaviour
 
     private void OnCollisionExit2D(Collision2D collision)
     {
-        if(collision.collider.tag==moveFloorTag)
+        if (collision.collider.tag == moveFloorTag)
         {
             //動く床から離れた
             moveObj = null;
