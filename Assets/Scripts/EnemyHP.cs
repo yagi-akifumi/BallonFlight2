@@ -22,6 +22,7 @@ public class EnemyHP : MonoBehaviour
     private CapsuleCollider2D col = null;
     private bool rightTleftF = false;
     private bool isDead = false;
+    private Vector3 defaultScale;
     #endregion
 
     // Start is called before the first frame update
@@ -32,29 +33,31 @@ public class EnemyHP : MonoBehaviour
         anim = GetComponent<Animator>();
         oc = GetComponent<ObjectCollision>();
         col = GetComponent<CapsuleCollider2D>();
+        defaultScale = transform.localScale;//初期の大きさを保存する
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
+        
         if (!oc.playerStepOn)
         {
             if (sr.isVisible || nonVisible)
             {
-                if(checkCollision.isOn)
+                if (checkCollision.isOn)
                 {
                     rightTleftF = !rightTleftF;
                 }
-
+                
                 int xVecter = -1;
                 if (rightTleftF)
                 {
                     xVecter = 1;
-                    transform.localScale = new Vector3(-1, 1, 1);
+                    transform.localScale = new Vector3(-defaultScale.x, defaultScale.y, defaultScale.z);
                 }
                 else
                 {
-                    transform.localScale = new Vector3(1, 1, 1);
+                    transform.localScale = new Vector3(defaultScale.x, defaultScale.y, defaultScale.z);
                 }
                 rb.velocity = new Vector2(xVecter * speed, -gravity);
             }
@@ -65,7 +68,7 @@ public class EnemyHP : MonoBehaviour
         }
         else
         {
-            if(!isDead)
+            if (!isDead)
             {
                 GManager.instance.PlaySE(enemySE);
                 anim.Play("Death");
