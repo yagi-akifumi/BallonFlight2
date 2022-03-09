@@ -98,6 +98,10 @@ public class Player : MonoBehaviour
     {
         if (!isDown && !GManager.instance.isGameOver && !GManager.instance.isStageClear)
         {
+            //音楽を止める
+            //AudioSource source = GameObject.Find("BGM").gameObject.GetComponent<AudioSource>();
+            //source.Stop();
+
             //接地判定を得る
             isGround = ground.IsGround();
             isHead = head.IsGround();

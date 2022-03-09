@@ -27,6 +27,7 @@ public class EnemyCollisionCheck : MonoBehaviour
     {
         if (collision.tag == groundTag || collision.tag == enemyTag)
         {
+
             isOn = false;
         }
     }

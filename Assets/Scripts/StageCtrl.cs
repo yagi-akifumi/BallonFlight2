@@ -50,6 +50,10 @@ public class StageCtrl : MonoBehaviour
         //ゲームオーバー時の処理
         if (GManager.instance.isGameOver && !doGameOver)
         {
+            //音楽を止める
+            AudioSource source = GameObject.Find("BGM").gameObject.GetComponent<AudioSource>();
+            source.Stop();
+
             gameOverObj.SetActive(true);
             GManager.instance.PlaySE(gameOverSE);
             doGameOver = true;
